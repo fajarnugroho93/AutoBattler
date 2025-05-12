@@ -1,0 +1,34 @@
+using System;
+using System.Collections.Generic;
+using R3;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills;
+using UnityEngine;
+
+namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
+{
+    [Serializable]
+    public class UnitModel : ICloneable
+    {
+        public int Tier;
+        public int Index;
+        public string Name;
+        public Sprite Portrait;
+        public float DeployTime;
+        public List<SkillModel> Skills;
+        
+        public ReactiveProperty<UnitState> State;
+        public ReactiveProperty<UnitPosition> Position;
+        
+        public ReactiveProperty<float> CurrentDeployTime;
+        
+        public UnitModel(UnitModel unitModel)
+        {
+            
+        }
+        
+        public object Clone()
+        {
+            return new UnitModel(this);
+        }
+    }
+}
