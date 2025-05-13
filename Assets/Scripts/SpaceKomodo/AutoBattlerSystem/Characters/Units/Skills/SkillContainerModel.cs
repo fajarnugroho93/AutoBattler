@@ -8,6 +8,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
     public class SkillContainerModel : ICloneable
     {
         public SkillType Type;
+        public string Data;
         public List<EffectContainerModel> EffectContainerModels;
         
         public SkillContainerModel(SkillContainerModel skillContainerModel)
