@@ -2,15 +2,14 @@ using UnityEditor;
 using UnityEngine;
 using SpaceKomodo.Editor;
 
-namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Editor
+namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Effects.Editor
 {
-    [CustomPropertyDrawer(typeof(SkillContainerModel))]
-    public class SkillContainerModelPropertyDrawer : ReflectionPropertyDrawer
+    [CustomPropertyDrawer(typeof(EffectContainerModel))]
+    public class EffectContainerModelPropertyDrawer : ReflectionPropertyDrawer
     {
-        private const string ModelNamespace = "SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Models";
+        private const string ModelNamespace = "SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Effects.Models";
         private const string TypePropertyPath = "Type";
         private const string DataPropertyPath = "Data";
-        private const string EffectsPropertyPath = "Effects";
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -20,28 +19,25 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Editor
             
             var typeProperty = property.FindPropertyRelative(TypePropertyPath);
             var dataProperty = property.FindPropertyRelative(DataPropertyPath);
-            var effectsProperty = property.FindPropertyRelative(EffectsPropertyPath);
             
             EditorGUI.PropertyField(position, typeProperty);
             position.y += EditorGUIUtility.singleLineHeight + PropertySpacing;
             
-            var enumValue = (SkillType)typeProperty.enumValueIndex;
+            var enumValue = (EffectType)typeProperty.enumValueIndex;
             var previousEnumValue = typeProperty.hasMultipleDifferentValues ? 
-                enumValue : (SkillType)typeProperty.enumValueFlag;
+                enumValue : (EffectType)typeProperty.enumValueFlag;
             
             if (previousEnumValue != enumValue)
             {
                 dataProperty.stringValue = string.Empty;
                 typeProperty.enumValueFlag = (int)enumValue;
             }
-
+            
             var modelType = GetModelTypeForEnum(enumValue, ModelNamespace);
             if (modelType != null)
             {
-                position.y += DrawJsonSerializedProperties(position, dataProperty, modelType);
+                DrawJsonSerializedProperties(position, dataProperty, modelType);
             }
-            
-            EditorGUI.PropertyField(position, effectsProperty, true);
             
             EditorGUI.EndProperty();
         }
@@ -51,13 +47,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Editor
             var height = EditorGUIUtility.singleLineHeight;
             
             var typeProperty = property.FindPropertyRelative(TypePropertyPath);
-            var effectsProperty = property.FindPropertyRelative(EffectsPropertyPath);
+            var enumValue = (EffectType)typeProperty.enumValueIndex;
             
-            var enumValue = (SkillType)typeProperty.enumValueIndex;
             var modelType = GetModelTypeForEnum(enumValue, ModelNamespace);
-            
             height += GetJsonTypeHeight(modelType);
-            height += EditorGUI.GetPropertyHeight(effectsProperty, true);
             
             return height;
         }

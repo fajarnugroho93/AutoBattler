@@ -9,7 +9,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
     {
         public SkillType Type;
         public string Data;
-        public List<EffectContainerModel> EffectContainerModels;
+        public List<EffectContainerModel> Effects;
         
         public SkillContainerModel(SkillContainerModel skillContainerModel)
         {
