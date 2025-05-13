@@ -5,19 +5,19 @@ using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills.Effects;
 namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
 {
     [Serializable]
-    public class SkillModel : ICloneable
+    public class SkillContainerModel : ICloneable
     {
         public SkillType Type;
-        public List<EffectContainer> EffectContainers;
+        public List<EffectContainerModel> EffectContainerModels;
         
-        public SkillModel(SkillModel skillModel)
+        public SkillContainerModel(SkillContainerModel skillContainerModel)
         {
             
         }
         
         public object Clone()
         {
-            return new SkillModel(this);
+            return new SkillContainerModel(this);
         }
     }
 }
