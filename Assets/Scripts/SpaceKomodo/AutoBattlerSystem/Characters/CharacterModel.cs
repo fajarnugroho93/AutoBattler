@@ -7,16 +7,22 @@ using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 namespace SpaceKomodo.AutoBattlerSystem.Characters
 {
     [Serializable]
-    public class CharacterModel
+    public class CharacterModel : ICloneable
     {
+        public List<UnitScriptableObject> BackLoadouts;
+        public List<UnitScriptableObject> CenterLoadouts;
+        public List<UnitScriptableObject> FrontLoadouts;
+
+        public int Health;
+        
         public Dictionary<UnitPosition, QueueModel> Queues = new();
         public Dictionary<UnitPosition, DeployModel> Deploys = new();
 
-        public void Setup(CharacterScriptableObject characterScriptableObject)
+        public CharacterModel(CharacterModel characterModel)
         {
-            SetupLoadout(UnitPosition.Back, characterScriptableObject.BackLoadouts);
-            SetupLoadout(UnitPosition.Center, characterScriptableObject.CenterLoadouts);
-            SetupLoadout(UnitPosition.Front, characterScriptableObject.FrontLoadouts);
+            SetupLoadout(UnitPosition.Back, characterModel.BackLoadouts);
+            SetupLoadout(UnitPosition.Center, characterModel.CenterLoadouts);
+            SetupLoadout(UnitPosition.Front, characterModel.FrontLoadouts);
 
             void SetupLoadout(UnitPosition unitPosition, List<UnitScriptableObject> unitScriptableObjects)
             {
@@ -28,6 +34,11 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
                     newQueueModel.Units.Add(unitScriptableObject.UnitModel);
                 }
             }
+        }
+
+        public object Clone()
+        {
+            return new CharacterModel(this);
         }
     }
 }
