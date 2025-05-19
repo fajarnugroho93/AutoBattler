@@ -1,6 +1,6 @@
 namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
 {
-    public enum UnitTag
+    public enum UnitTagType
     {
         Weapon = 0,
         Medic = 1,

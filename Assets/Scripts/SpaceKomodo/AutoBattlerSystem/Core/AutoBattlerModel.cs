@@ -1,4 +1,5 @@
 using SpaceKomodo.AutoBattlerSystem.Characters;
+using SpaceKomodo.AutoBattlerSystem.Player;
 using UnityEngine;
 
 namespace SpaceKomodo.AutoBattlerSystem.Core
@@ -8,20 +9,27 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
         public CharacterScriptableObject PlayerCharacterScriptableObject;
         public CharacterScriptableObject EnemyCharacterScriptableObject;
         
-        [HideInInspector] public CharacterModel PlayerCharacterModel;
-        [HideInInspector] public CharacterModel EnemyCharacterModel;
+        [HideInInspector] public PlayerModel PlayerModel;
+        [HideInInspector] public PlayerModel EnemyModel;
 
         public void Setup()
         {
-            SetupCharacterModel(PlayerCharacterScriptableObject, out PlayerCharacterModel);
-            SetupCharacterModel(EnemyCharacterScriptableObject, out EnemyCharacterModel);
+            SetupCharacterModel(PlayerCharacterScriptableObject, out PlayerModel);
+            SetupCharacterModel(EnemyCharacterScriptableObject, out EnemyModel);
+        }
+
+        public void ResetModel()
+        {
+            PlayerModel.ResetModel();
+            EnemyModel.ResetModel();
         }
 
         private static void SetupCharacterModel(
             CharacterScriptableObject characterScriptableObject,
-            out CharacterModel characterModel)
+            out PlayerModel playerModel)
         {
-            characterModel = (CharacterModel) characterScriptableObject.CharacterModel.Clone();
+            var characterModel = (CharacterModel) characterScriptableObject.CharacterModel.Clone();
+            playerModel = new PlayerModel(characterModel);
         }
     }
 }

@@ -1,5 +1,6 @@
 using MessagePipe;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using SpaceKomodo.AutoBattlerSystem.Simulator;
 using SpaceKomodo.Utilities;
 using VContainer;
 using VContainer.Unity;
@@ -21,6 +22,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
             builder.RegisterComponentInHierarchy<AutoBattlerModel>();
             builder.RegisterComponentInHierarchy<AutoBattlerView>();
             
+            builder.Register<SimulatorModel>(Lifetime.Singleton);
+            
+            builder.RegisterEntryPoint<SimulatorController>();
+            builder.RegisterEntryPoint<SimulatorPlayerController>();
             builder.RegisterEntryPoint<AutoBattlerController>();
         }
     }

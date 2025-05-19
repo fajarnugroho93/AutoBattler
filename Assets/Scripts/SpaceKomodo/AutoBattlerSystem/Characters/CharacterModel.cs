@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SpaceKomodo.AutoBattlerSystem.Characters.Deploy;
-using SpaceKomodo.AutoBattlerSystem.Characters.Queue;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 
 namespace SpaceKomodo.AutoBattlerSystem.Characters
@@ -13,10 +11,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
         public List<UnitScriptableObject> CenterLoadouts;
         public List<UnitScriptableObject> FrontLoadouts;
 
-        public int Health;
+        public int Life;
+        public int Spirit;
         
-        public Dictionary<UnitPosition, QueueModel> Queues = new();
-        public Dictionary<UnitPosition, DeployModel> Deploys = new();
+        public Dictionary<UnitPosition, PositionModel> Positions = new();
 
         public CharacterModel(CharacterModel characterModel)
         {
@@ -26,12 +24,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
 
             void SetupLoadout(UnitPosition unitPosition, List<UnitScriptableObject> unitScriptableObjects)
             {
-                var newQueueModel = new QueueModel();
-                Queues.Add(unitPosition, newQueueModel);
+                var newPositionModel = new PositionModel();
+                Positions.Add(unitPosition, newPositionModel);
 
                 foreach (var unitScriptableObject in unitScriptableObjects)
                 {
-                    newQueueModel.Units.Add(unitScriptableObject.UnitModel);
+                    newPositionModel.Units.Add(unitScriptableObject.UnitModel);
                 }
             }
         }

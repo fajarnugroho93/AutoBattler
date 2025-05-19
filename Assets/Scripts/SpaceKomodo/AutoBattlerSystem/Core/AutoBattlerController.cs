@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using SpaceKomodo.AutoBattlerSystem.Characters.Queue;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
 using SpaceKomodo.Utilities;
@@ -31,23 +30,23 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
             _autoBattlerModel.Setup();
 
             InstantiateUnitViews(
-                _autoBattlerModel.PlayerCharacterModel.Queues, 
-                _autoBattlerView.PlayerView, 
+                _autoBattlerModel.PlayerModel.CharacterModel.Positions, 
+                _autoBattlerView.PlayerWorldView, 
                 _playerUnitViews);
 
             InstantiateUnitViews(
-                _autoBattlerModel.EnemyCharacterModel.Queues, 
-                _autoBattlerView.EnemyView, 
+                _autoBattlerModel.EnemyModel.CharacterModel.Positions, 
+                _autoBattlerView.EnemyWorldView, 
                 _enemyUnitViews);
 
             void InstantiateUnitViews(
-                Dictionary<UnitPosition, QueueModel> queues, 
-                PlayerView playerView, 
+                Dictionary<UnitPosition, PositionModel> positions, 
+                PlayerWorldView playerView, 
                 IDictionary<UnitModel, UnitView> unitViews)
             {
-                foreach (var keyValuePair in queues)
+                foreach (var keyValuePair in positions)
                 {
-                    var worldLayoutGroup = playerView.GetQueueParent(keyValuePair.Key);
+                    var worldLayoutGroup = playerView.GetPositionParent(keyValuePair.Key);
                     
                     foreach (var unitModel in keyValuePair.Value.Units)
                     {

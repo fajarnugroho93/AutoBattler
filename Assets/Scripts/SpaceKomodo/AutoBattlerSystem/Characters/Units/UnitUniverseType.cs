@@ -1,6 +1,6 @@
 namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
 {
-    public enum UnitUniverse
+    public enum UnitUniverseType
     {
         MedievalKingdom = 0,
         PrehistoricRiders = 1,

@@ -13,13 +13,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
         public int Index;
         public string Name;
         public Sprite Portrait;
-        public float DeployTime;
         public List<SkillContainerModel> Skills;
         
         public ReactiveProperty<UnitState> State;
         public ReactiveProperty<UnitPosition> Position;
-        
-        public ReactiveProperty<float> CurrentDeployTime;
         
         public UnitModel(UnitModel unitModel)
         {
