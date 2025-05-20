@@ -48,7 +48,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
                 {
                     var worldLayoutGroup = playerView.GetPositionParent(keyValuePair.Key);
                     
-                    foreach (var unitModel in keyValuePair.Value.Units)
+                    foreach (var unitModel in keyValuePair.Value.Units.Value)
                     {
                         var view = _unitViewFactory.Create(unitModel, worldLayoutGroup.transform);
                         unitViews.Add(unitModel, view);

@@ -2,13 +2,19 @@ using System;
 using System.Collections.Generic;
 using R3;
 using SpaceKomodo.AutoBattlerSystem.Characters;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 
 namespace SpaceKomodo.AutoBattlerSystem.Player
 {
     public class PlayerModel
     {
-        public CharacterModel CharacterModel;
+        public readonly CharacterModel CharacterModel;
         public readonly Dictionary<PlayerAttributeType, PlayerAttribute> Attributes;
+
+        public SquadModel SquadModel;
+        public readonly Dictionary<BattleTargetFlags, UnitModel> BattleTargetFlagsToUnitModelDictionary = new();
+        public readonly Dictionary<UnitModel, BattleTargetFlags> UnitModelToBattleTargetFlagsDictionary = new();
 
         public PlayerModel(
             CharacterModel characterModel)

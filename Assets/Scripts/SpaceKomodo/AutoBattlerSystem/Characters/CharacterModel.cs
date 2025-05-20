@@ -22,6 +22,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
             SetupLoadout(UnitPosition.Center, characterModel.CenterLoadouts);
             SetupLoadout(UnitPosition.Front, characterModel.FrontLoadouts);
 
+            Life = characterModel.Life;
+            Spirit = characterModel.Spirit;
+
             void SetupLoadout(UnitPosition unitPosition, List<UnitScriptableObject> unitScriptableObjects)
             {
                 var newPositionModel = new PositionModel();
@@ -29,7 +32,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
 
                 foreach (var unitScriptableObject in unitScriptableObjects)
                 {
-                    newPositionModel.Units.Add(unitScriptableObject.UnitModel);
+                    newPositionModel.Units.Value.Add(unitScriptableObject.UnitModel);
                 }
             }
         }

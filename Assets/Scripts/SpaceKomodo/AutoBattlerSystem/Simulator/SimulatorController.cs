@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using MessagePipe;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Core;
 using SpaceKomodo.AutoBattlerSystem.Events;
 using SpaceKomodo.AutoBattlerSystem.Player;
+using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 using VContainer.Unity;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
@@ -53,18 +55,21 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         {
             PrepareBattle();
             
-            foreach (var FrameEventList in _simulatorModel.Events)
+            foreach (var frameEventList in _simulatorModel.Events)
             {
-                _currentFrameEventList = FrameEventList;
-                
+                _currentFrameEventList = frameEventList;
+
+                EvaluateUnitSkills();
                 EvaluateEntropy();
                 
-                if (_playerModel.IsDead())
-                {
-                    break;
-                }
                 if (_enemyModel.IsDead())
                 {
+                    KillPlayer(_enemyModel);
+                    break;
+                }
+                if (_playerModel.IsDead())
+                {
+                    KillPlayer(_playerModel);
                     break;
                 }
                 
@@ -78,6 +83,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             
             _playerModel = _autoBattlerModel.PlayerModel;
             _enemyModel = _autoBattlerModel.EnemyModel;
+
+            SyncBattleDictionaries();
+            
             _simulatorModel.ClearEvents();
             _tickCounter = 0;
             
@@ -90,6 +98,45 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             _entropyTickAdditiveScalar = SimulatorConstants.EntropyDurationAdditiveScalar;
         }
 
+        private void SyncBattleDictionaries()
+        {
+            var battleTargetFlagsToUnitModelDictionary = _playerModel.BattleTargetFlagsToUnitModelDictionary;
+            var unitModelToBattleTargetFlagsDictionary = _playerModel.UnitModelToBattleTargetFlagsDictionary;
+            _playerModel.BattleTargetFlagsToUnitModelDictionary.Clear();
+            _playerModel.UnitModelToBattleTargetFlagsDictionary.Clear();
+            
+            SyncField(BattleTargetFlags.PlayerFieldFront_0, _playerModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
+            SyncField(BattleTargetFlags.PlayerFieldCenter_0, _playerModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
+            SyncField(BattleTargetFlags.PlayerFieldBack_0, _playerModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldFront_0, _enemyModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldCenter_0, _enemyModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldBack_0, _enemyModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
+            
+            void SyncField(BattleTargetFlags startingFlag, IReadOnlyList<UnitModel> unitModels)
+            {
+                for (var i = 0; i < unitModels.Count; ++i)
+                {
+                    var unitModel = unitModels[i];
+                    var battleTargetFlag = (BattleTargetFlags)(uint)((int)startingFlag << i);
+                    battleTargetFlagsToUnitModelDictionary[battleTargetFlag] = unitModel;
+                    unitModelToBattleTargetFlagsDictionary[unitModel] = 
+                        unitModelToBattleTargetFlagsDictionary.TryGetValue(unitModel, out var existingBattleTargetFlags) ? 
+                        (BattleTargetFlags)(uint)((int)existingBattleTargetFlags + (int)battleTargetFlag) : 
+                        battleTargetFlag;
+                }
+            }
+        }
+
+        private void EvaluateUnitSkills()
+        {
+            
+        }
+
+        private void InvokeUnitSkill()
+        {
+            
+        }
+        
         #region Entropy
         private void EvaluateEntropy()
         {
@@ -104,6 +151,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                     }
                     case SimulatorConstants.EntropyStartTick:
                     {
+                        _isEntropyActive = true;
                         AddNewSimulatorEvent(SimulatorEventType.StartEntropy);
                         TakeEntropyDamage(_playerModel);
                         TakeEntropyDamage(_enemyModel);
@@ -162,6 +210,16 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             newSimulatorEvent.ValueBefore = targetPlayerModel.Attributes[PlayerAttributeType.Life].Value.Value;
             targetPlayerModel.AdjustPlayerAttribute(PlayerAttributeType.Life, SimulatorOperationType.ApplyToCurrentValue, -roundedValue);
             newSimulatorEvent.ValueAfter = targetPlayerModel.Attributes[PlayerAttributeType.Life].Value.Value;
+            AddNewSimulatorEvent(newSimulatorEvent);
+        }
+
+        private void KillPlayer(PlayerModel targetPlayerModel)
+        {
+            var newSimulatorEvent = new SimulatorEvent
+            {
+                Type = SimulatorEventType.Death,
+                TargetPlayer = targetPlayerModel,
+            };
             AddNewSimulatorEvent(newSimulatorEvent);
         }
 

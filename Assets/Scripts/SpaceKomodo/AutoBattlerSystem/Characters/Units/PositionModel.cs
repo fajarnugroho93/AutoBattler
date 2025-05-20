@@ -1,11 +1,12 @@
 using System;
-using ObservableCollections;
+using System.Collections.Generic;
+using R3;
 
 namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
 {
     [Serializable]
     public class PositionModel
     {
-        public ObservableList<UnitModel> Units = new();
+        public ReactiveProperty<List<UnitModel>> Units = new(new List<UnitModel>());
     }
 }

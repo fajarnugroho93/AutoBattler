@@ -14,9 +14,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
         public string Name;
         public Sprite Portrait;
         public List<SkillContainerModel> Skills;
+
         
-        public ReactiveProperty<UnitState> State;
-        public ReactiveProperty<UnitPosition> Position;
         
         public UnitModel(UnitModel unitModel)
         {

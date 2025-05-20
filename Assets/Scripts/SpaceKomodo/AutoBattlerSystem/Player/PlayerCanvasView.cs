@@ -16,7 +16,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Player
 
             void OnPlayerLifeValueChanged(int value)
             {
-                LifeSlider.BarTarget = playerModel.Attributes[PlayerAttributeType.Life].ValuePercentage;
+                LifeSlider.UpdateBar01(playerModel.Attributes[PlayerAttributeType.Life].ValuePercentage);
             }
             
             playerModel.Attributes[PlayerAttributeType.Life].MaxValue.Subscribe(OnPlayerLifeMaxValueChanged);
@@ -30,7 +30,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Player
             
             void OnPlayerSpiritValueChanged(int value)
             {
-                SpiritSlider.BarTarget = playerModel.Attributes[PlayerAttributeType.Spirit].ValuePercentage;
+                SpiritSlider.UpdateBar01(playerModel.Attributes[PlayerAttributeType.Spirit].ValuePercentage);
             }
 
             playerModel.Attributes[PlayerAttributeType.Spirit].MaxValue.Subscribe(OnPlayerSpiritMaxValueChanged);
