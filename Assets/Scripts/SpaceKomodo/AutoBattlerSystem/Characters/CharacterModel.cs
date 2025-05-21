@@ -12,7 +12,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
         public List<UnitScriptableObject> FrontLoadouts;
 
         public int Life;
-        public int Spirit;
         
         public Dictionary<UnitPosition, PositionModel> Positions = new();
 
@@ -23,7 +22,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
             SetupLoadout(UnitPosition.Front, characterModel.FrontLoadouts);
 
             Life = characterModel.Life;
-            Spirit = characterModel.Spirit;
 
             void SetupLoadout(UnitPosition unitPosition, List<UnitScriptableObject> unitScriptableObjects)
             {
@@ -32,7 +30,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters
 
                 foreach (var unitScriptableObject in unitScriptableObjects)
                 {
-                    newPositionModel.Units.Value.Add(unitScriptableObject.UnitModel);
+                    newPositionModel.Units.Value.Add((UnitModel)unitScriptableObject.UnitModel.Clone());
                 }
             }
         }

@@ -79,12 +79,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
         private void PrepareBattle()
         {
-            _autoBattlerModel.ResetModel();
-            
             _playerModel = _autoBattlerModel.PlayerModel;
             _enemyModel = _autoBattlerModel.EnemyModel;
-
             SyncBattleDictionaries();
+            _autoBattlerModel.ResetModel();
             
             _simulatorModel.ClearEvents();
             _tickCounter = 0;

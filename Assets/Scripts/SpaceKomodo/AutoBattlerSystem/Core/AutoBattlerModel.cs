@@ -16,6 +16,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
         {
             SetupCharacterModel(PlayerCharacterScriptableObject, out PlayerModel);
             SetupCharacterModel(EnemyCharacterScriptableObject, out EnemyModel);
+            
+            ResetModel();
         }
 
         public void ResetModel()

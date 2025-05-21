@@ -1,8 +1,10 @@
+using System;
+
 namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
 {
+    [Serializable]
     public enum UnitAttributeType
     {
-        None,
-        Price,
+        Life,
     }
 }

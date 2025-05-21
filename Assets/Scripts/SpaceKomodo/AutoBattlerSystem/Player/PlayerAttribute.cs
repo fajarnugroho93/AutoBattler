@@ -4,8 +4,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Player
 {
     public class PlayerAttribute
     {
-        public PlayerAttributeType AttributeType;
-
         public ReactiveProperty<int> Value;
         public ReactiveProperty<int> MaxValue;
 

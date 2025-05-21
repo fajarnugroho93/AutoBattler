@@ -156,10 +156,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                     return PlayerAttributeType.Life;
                 case SimulatorEventType.Armour:
                     return PlayerAttributeType.Armour;
-                case SimulatorEventType.Spirit:
-                    return PlayerAttributeType.Spirit;
-                case SimulatorEventType.Aura:
-                    return PlayerAttributeType.Aura;
                 default:
                     return null;
             }

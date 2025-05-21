@@ -1,10 +1,10 @@
 using System;
 using R3;
 
-namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
+namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
 {
     [Serializable]
-    public class UnitAttribute
+    public class SkillAttribute
     {
         public ReactiveProperty<int> Value;
         public ReactiveProperty<int> MaxValue;

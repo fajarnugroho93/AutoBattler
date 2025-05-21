@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SpaceKomodo.AutoBattlerSystem.Characters;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
 using SpaceKomodo.Utilities;
