@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MessagePipe;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills;
 using SpaceKomodo.AutoBattlerSystem.Core;
 using SpaceKomodo.AutoBattlerSystem.Events;
 using SpaceKomodo.AutoBattlerSystem.Player;
@@ -55,8 +56,13 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             {
                 _currentFrameEventList = frameEventList;
 
-                EvaluateUnitSkills();
+                EvaluateUnitSkills(_simulatorModel.PlayerUnitModels);
+                EvaluateUnitSkills(_simulatorModel.EnemyUnitModels);
+                
                 EvaluateEntropy();
+
+                EvaluateUnitDeaths(_simulatorModel.PlayerUnitModels);
+                EvaluateUnitDeaths(_simulatorModel.EnemyUnitModels);
                 
                 if (_simulatorModel.IsEnemyLose())
                 {
@@ -91,14 +97,89 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             _entropyTickAdditiveScalar = SimulatorConstants.EntropyDurationAdditiveScalar;
         }
 
-        private void EvaluateUnitSkills()
+        private void EvaluateUnitSkills(HashSet<UnitModel> unitModels)
         {
-            
+            foreach (var unitModel in unitModels)
+            {
+                if (unitModel.IsDead)
+                {
+                    continue;
+                }
+
+                foreach (var skillModel in unitModel.Skills)
+                {
+                    if (!skillModel.IsActiveSkill)
+                    {
+                        continue;
+                    }
+                    
+                    var attribute = skillModel.Attributes[SkillAttributeType.Cooldown];
+                    var newSimulatorEvent = new SimulatorEvent
+                    {
+                        Type = SimulatorEventType.Cooldown,
+                        SourceUnit = unitModel,
+                        TargetUnit = unitModel,
+                        TargetSkill = skillModel,
+                        OperationType = SimulatorOperationType.ApplyToValue,
+                        ValueBefore = attribute.Value.Value
+                    };
+                    var deltaValue = CalculateCooldownFrameValue();
+                    skillModel.AdjustSkillAttribute(SkillAttributeType.Cooldown, SimulatorOperationType.ApplyToValue, -deltaValue);
+                    newSimulatorEvent.ValueAfter = attribute.Value.Value;
+                    AddNewSimulatorEvent(newSimulatorEvent);
+
+                    if (attribute.Value.Value <= 0)
+                    {
+                        newSimulatorEvent = new SimulatorEvent
+                        {
+                            Type = SimulatorEventType.Cooldown,
+                            SourceUnit = unitModel,
+                            TargetUnit = unitModel,
+                            TargetSkill = skillModel,
+                            OperationType = SimulatorOperationType.ApplyToValue,
+                            ValueBefore = attribute.Value.Value
+                        };
+                        skillModel.SetSkillAttribute(SkillAttributeType.Cooldown, SimulatorOperationType.ApplyToValue, attribute.MaxValue.Value);
+                        newSimulatorEvent.ValueAfter = attribute.Value.Value;
+                        AddNewSimulatorEvent(newSimulatorEvent);
+                        InvokeUnitSkill();
+                    }
+                }
+            }
+        }
+
+        private int CalculateCooldownFrameValue()
+        {
+            return (int)SimulatorConstants.FrameTick;
         }
 
         private void InvokeUnitSkill()
         {
             
+        }
+
+        private void EvaluateUnitDeaths(HashSet<UnitModel> unitModels)
+        {
+            foreach (var unitModel in unitModels)
+            {
+                if (unitModel.IsDead)
+                {
+                    continue;
+                }
+
+                if (!unitModel.EvaluateDeath())
+                {
+                    continue;
+                }
+                
+                var newSimulatorEvent = new SimulatorEvent
+                {
+                    Type = SimulatorEventType.Death,
+                    TargetUnit = unitModel,
+                };
+                AddNewSimulatorEvent(newSimulatorEvent);
+                unitModel.IsDead = true;
+            }
         }
         
         private void EvaluateEntropy()
@@ -169,32 +250,19 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             {
                 return;
             }
-            
+
+            var attributeValue = targetUnitModel.Attributes[UnitAttributeType.Life].Value;
             var newSimulatorEvent = new SimulatorEvent
             {
                 Type = SimulatorEventType.Life,
                 TargetUnit = targetUnitModel,
                 SourceType = sourceType,
-                OperationType = SimulatorOperationType.ApplyToCurrentValue,
+                OperationType = SimulatorOperationType.ApplyToValue,
+                ValueBefore = attributeValue.Value
             };
-            newSimulatorEvent.ValueBefore = targetUnitModel.Attributes[UnitAttributeType.Life].Value.Value;
-            targetUnitModel.AdjustUnitAttribute(UnitAttributeType.Life, SimulatorOperationType.ApplyToCurrentValue, -roundedValue);
-            newSimulatorEvent.ValueAfter = targetUnitModel.Attributes[UnitAttributeType.Life].Value.Value;
+            targetUnitModel.AdjustUnitAttribute(UnitAttributeType.Life, SimulatorOperationType.ApplyToValue, -roundedValue);
+            newSimulatorEvent.ValueAfter = attributeValue.Value;
             AddNewSimulatorEvent(newSimulatorEvent);
-            EvaluateUnitDeath(newSimulatorEvent);
-        }
-
-        private void EvaluateUnitDeath(SimulatorEvent simulatorEvent)
-        {
-            if (simulatorEvent.ValueBefore > 0 && simulatorEvent.ValueAfter <= 0)
-            {
-                var newSimulatorEvent = new SimulatorEvent
-                {
-                    Type = SimulatorEventType.Death,
-                    TargetUnit = simulatorEvent.TargetUnit,
-                };
-                AddNewSimulatorEvent(newSimulatorEvent);
-            }
         }
 
         private void LosePlayer(PlayerModel targetPlayerModel)

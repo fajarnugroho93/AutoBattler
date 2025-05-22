@@ -62,5 +62,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
         {
             return new SkillModel(this);
         }
+
+        public bool IsActiveSkill => Attributes.ContainsKey(SkillAttributeType.Cooldown);
     }
 }

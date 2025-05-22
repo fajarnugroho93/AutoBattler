@@ -15,6 +15,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
         public string Name;
         public Sprite Portrait;
         public List<SkillModel> Skills;
+        public bool IsDead;
 
         public SerializedDictionary<UnitAttributeType, UnitAttribute> Attributes;
 
@@ -52,6 +53,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
 
         public void ResetModel()
         {
+            IsDead = false;
+            
             Attributes[UnitAttributeType.Life].Value.Value = _cachedReference.Attributes[UnitAttributeType.Life].value;
             Attributes[UnitAttributeType.Life].MaxValue.Value = _cachedReference.Attributes[UnitAttributeType.Life].value;
 
@@ -66,6 +69,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
             return new UnitModel(this);
         }
 
-        public bool IsDead => Attributes[UnitAttributeType.Life].Value.Value <= 0;
+        public bool EvaluateDeath()
+        {
+            return Attributes[UnitAttributeType.Life].Value.Value <= 0;
+        }
     }
 }

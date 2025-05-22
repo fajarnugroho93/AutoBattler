@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills;
 using SpaceKomodo.Utilities;
 using VContainer.Unity;
 
@@ -22,7 +23,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         private readonly ISubscriber<ResumePlaybackEvent> _resumePlaybackSubscriber;
 
         private Coroutine _playbackCoroutine;
-        private float _playbackSpeed = 10f;
+        private float _playbackSpeed;
 
         private float FramePlaybackDuration => SimulatorConstants.FrameSecond / _playbackSpeed;
 
@@ -77,7 +78,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         {
             _simulatorModel.ResetSimulatorPlayer();
             _simulatorModel.ResetModel();
-            _playbackSpeed = 5f;
+            _playbackSpeed = 2f;
             _autoBattlerModel.ResetModel();
             
             if (_playbackCoroutine != null)
@@ -125,10 +126,13 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                 case SimulatorEventType.Armour:
                 case SimulatorEventType.Spirit:
                 case SimulatorEventType.Aura:
-                    ApplyAttributeEvent(simulatorEvent);
+                    ApplyUnitAttributeEvent(simulatorEvent);
+                    break;
+                case SimulatorEventType.Cooldown:
+                    ApplySkillAttributeEvent(simulatorEvent);
                     break;
                 case SimulatorEventType.Death:
-                    HandleDeathEvent();
+                    HandleUnitDeathEvent(simulatorEvent);
                     break;
                 case SimulatorEventType.StartEntropyCountdown:
                     break;
@@ -137,7 +141,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             }
         }
 
-        private void ApplyAttributeEvent(SimulatorEvent simulatorEvent)
+        private void ApplyUnitAttributeEvent(SimulatorEvent simulatorEvent)
         {
             var unitModel = simulatorEvent.TargetUnit;
             var attributeType = GetUnitAttributeType(simulatorEvent.Type);
@@ -148,14 +152,37 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             }
         }
 
+        private void ApplySkillAttributeEvent(SimulatorEvent simulatorEvent)
+        {
+            var skillModel = simulatorEvent.TargetSkill;
+            var attributeType = GetSkillAttributeType(simulatorEvent.Type);
+            
+            if (attributeType != null)
+            {
+                skillModel.Attributes[attributeType.Value].Value.Value = (int)simulatorEvent.ValueAfter;
+            }
+        }
+
         private void HandleLoseEvent()
         {
             _simulatorModel.IsSimulating = false;
         }
 
-        private void HandleDeathEvent()
+        private void HandleUnitDeathEvent(SimulatorEvent simulatorEvent)
         {
-            // _simulatorModel.IsSimulating = false;
+            var unitModel = simulatorEvent.TargetUnit;
+            unitModel.IsDead = true;
+        }
+
+        private SkillAttributeType? GetSkillAttributeType(SimulatorEventType eventType)
+        {
+            switch (eventType)
+            {
+                case SimulatorEventType.Cooldown:
+                    return SkillAttributeType.Cooldown;
+                default:
+                    return null;
+            }
         }
 
         private UnitAttributeType? GetUnitAttributeType(SimulatorEventType eventType)
