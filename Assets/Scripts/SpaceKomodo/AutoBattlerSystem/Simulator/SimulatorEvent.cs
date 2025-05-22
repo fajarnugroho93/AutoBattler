@@ -1,3 +1,4 @@
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
@@ -7,6 +8,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         public SimulatorEventType Type;
         
         public PlayerModel TargetPlayer;
+        public UnitModel SourceUnit;
+        public UnitModel TargetUnit;
         public SimulatorSourceType SourceType;
         public SimulatorOperationType OperationType;
         public float ValueBefore;

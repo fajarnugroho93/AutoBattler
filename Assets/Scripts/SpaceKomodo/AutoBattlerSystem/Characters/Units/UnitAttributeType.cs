@@ -6,5 +6,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
     public enum UnitAttributeType
     {
         Life,
+        Armour,
     }
 }

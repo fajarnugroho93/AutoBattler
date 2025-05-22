@@ -65,5 +65,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units
         {
             return new UnitModel(this);
         }
+
+        public bool IsDead => Attributes[UnitAttributeType.Life].Value.Value <= 0;
     }
 }

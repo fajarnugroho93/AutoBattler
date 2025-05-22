@@ -5,7 +5,6 @@ using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Core;
 using SpaceKomodo.AutoBattlerSystem.Events;
 using SpaceKomodo.AutoBattlerSystem.Player;
-using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 using VContainer.Unity;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
@@ -15,9 +14,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         private readonly AutoBattlerModel _autoBattlerModel;
         private readonly SimulatorModel _simulatorModel;
         private readonly ISubscriber<SimulateButtonClickedEvent> _simulateButtonClickedSubscriber;
-
-        private PlayerModel _playerModel;
-        private PlayerModel _enemyModel;
         
         private uint _tickCounter;
         
@@ -62,14 +58,14 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                 EvaluateUnitSkills();
                 EvaluateEntropy();
                 
-                if (_enemyModel.IsDead())
+                if (_simulatorModel.IsEnemyLose())
                 {
-                    KillPlayer(_enemyModel);
+                    LosePlayer(_autoBattlerModel.EnemyModel);
                     break;
                 }
-                if (_playerModel.IsDead())
+                if (_simulatorModel.IsPlayerLose())
                 {
-                    KillPlayer(_playerModel);
+                    LosePlayer(_autoBattlerModel.PlayerModel);
                     break;
                 }
                 
@@ -79,11 +75,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
         private void PrepareBattle()
         {
-            _playerModel = _autoBattlerModel.PlayerModel;
-            _enemyModel = _autoBattlerModel.EnemyModel;
-            SyncBattleDictionaries();
+            _simulatorModel.SyncBattleCollections(_autoBattlerModel.PlayerModel, _autoBattlerModel.EnemyModel);
             _autoBattlerModel.ResetModel();
             
+            _simulatorModel.ResetModel();
             _simulatorModel.ClearEvents();
             _tickCounter = 0;
             
@@ -96,35 +91,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             _entropyTickAdditiveScalar = SimulatorConstants.EntropyDurationAdditiveScalar;
         }
 
-        private void SyncBattleDictionaries()
-        {
-            var battleTargetFlagsToUnitModelDictionary = _playerModel.BattleTargetFlagsToUnitModelDictionary;
-            var unitModelToBattleTargetFlagsDictionary = _playerModel.UnitModelToBattleTargetFlagsDictionary;
-            _playerModel.BattleTargetFlagsToUnitModelDictionary.Clear();
-            _playerModel.UnitModelToBattleTargetFlagsDictionary.Clear();
-            
-            SyncField(BattleTargetFlags.PlayerFieldFront_0, _playerModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
-            SyncField(BattleTargetFlags.PlayerFieldCenter_0, _playerModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
-            SyncField(BattleTargetFlags.PlayerFieldBack_0, _playerModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
-            SyncField(BattleTargetFlags.OpponentFieldFront_0, _enemyModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
-            SyncField(BattleTargetFlags.OpponentFieldCenter_0, _enemyModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
-            SyncField(BattleTargetFlags.OpponentFieldBack_0, _enemyModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
-            
-            void SyncField(BattleTargetFlags startingFlag, IReadOnlyList<UnitModel> unitModels)
-            {
-                for (var i = 0; i < unitModels.Count; ++i)
-                {
-                    var unitModel = unitModels[i];
-                    var battleTargetFlag = (BattleTargetFlags)(uint)((int)startingFlag << i);
-                    battleTargetFlagsToUnitModelDictionary[battleTargetFlag] = unitModel;
-                    unitModelToBattleTargetFlagsDictionary[unitModel] = 
-                        unitModelToBattleTargetFlagsDictionary.TryGetValue(unitModel, out var existingBattleTargetFlags) ? 
-                        (BattleTargetFlags)(uint)((int)existingBattleTargetFlags + (int)battleTargetFlag) : 
-                        battleTargetFlag;
-                }
-            }
-        }
-
         private void EvaluateUnitSkills()
         {
             
@@ -135,7 +101,6 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             
         }
         
-        #region Entropy
         private void EvaluateEntropy()
         {
             if (!_isEntropyActive)
@@ -151,8 +116,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                     {
                         _isEntropyActive = true;
                         AddNewSimulatorEvent(SimulatorEventType.StartEntropy);
-                        TakeEntropyDamage(_playerModel);
-                        TakeEntropyDamage(_enemyModel);
+                        TakeEntropyDamage(_simulatorModel.EnemyUnitModels);
+                        TakeEntropyDamage(_simulatorModel.PlayerUnitModels);
                         break;
                     }
                 }
@@ -164,8 +129,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
                 if (_entropyTickCounter >= _maxEntropyTick)
                 {
-                    TakeEntropyDamage(_playerModel);
-                    TakeEntropyDamage(_enemyModel);
+                    TakeEntropyDamage(_simulatorModel.EnemyUnitModels);
+                    TakeEntropyDamage(_simulatorModel.PlayerUnitModels);
                     _entropyTickCounter = 0;
 
                     if (_maxEntropyTick > _minEntropyTick)
@@ -180,14 +145,21 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             }
         }
 
-        private void TakeEntropyDamage(PlayerModel targetPlayerModel)
+        private void TakeEntropyDamage(HashSet<UnitModel> unitModels)
         {
-            TakeLifeDamage(targetPlayerModel, SimulatorSourceType.Entropy, _entropyDamage);
+            foreach (var unitModel in unitModels)
+            {
+                if (unitModel.IsDead)
+                {
+                    continue;
+                }
+                
+                TakeLifeDamage(unitModel, SimulatorSourceType.Entropy, _entropyDamage);   
+            }
         }
-        #endregion
 
         private void TakeLifeDamage(
-            PlayerModel targetPlayerModel, 
+            UnitModel targetUnitModel, 
             SimulatorSourceType sourceType,
             float deltaValue)
         {
@@ -201,21 +173,35 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             var newSimulatorEvent = new SimulatorEvent
             {
                 Type = SimulatorEventType.Life,
-                TargetPlayer = targetPlayerModel,
+                TargetUnit = targetUnitModel,
                 SourceType = sourceType,
                 OperationType = SimulatorOperationType.ApplyToCurrentValue,
             };
-            newSimulatorEvent.ValueBefore = targetPlayerModel.Attributes[PlayerAttributeType.Life].Value.Value;
-            targetPlayerModel.AdjustPlayerAttribute(PlayerAttributeType.Life, SimulatorOperationType.ApplyToCurrentValue, -roundedValue);
-            newSimulatorEvent.ValueAfter = targetPlayerModel.Attributes[PlayerAttributeType.Life].Value.Value;
+            newSimulatorEvent.ValueBefore = targetUnitModel.Attributes[UnitAttributeType.Life].Value.Value;
+            targetUnitModel.AdjustUnitAttribute(UnitAttributeType.Life, SimulatorOperationType.ApplyToCurrentValue, -roundedValue);
+            newSimulatorEvent.ValueAfter = targetUnitModel.Attributes[UnitAttributeType.Life].Value.Value;
             AddNewSimulatorEvent(newSimulatorEvent);
+            EvaluateUnitDeath(newSimulatorEvent);
         }
 
-        private void KillPlayer(PlayerModel targetPlayerModel)
+        private void EvaluateUnitDeath(SimulatorEvent simulatorEvent)
+        {
+            if (simulatorEvent.ValueBefore > 0 && simulatorEvent.ValueAfter <= 0)
+            {
+                var newSimulatorEvent = new SimulatorEvent
+                {
+                    Type = SimulatorEventType.Death,
+                    TargetUnit = simulatorEvent.TargetUnit,
+                };
+                AddNewSimulatorEvent(newSimulatorEvent);
+            }
+        }
+
+        private void LosePlayer(PlayerModel targetPlayerModel)
         {
             var newSimulatorEvent = new SimulatorEvent
             {
-                Type = SimulatorEventType.Death,
+                Type = SimulatorEventType.Lose,
                 TargetPlayer = targetPlayerModel,
             };
             AddNewSimulatorEvent(newSimulatorEvent);

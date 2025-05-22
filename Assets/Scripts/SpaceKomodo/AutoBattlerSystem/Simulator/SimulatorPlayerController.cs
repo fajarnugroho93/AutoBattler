@@ -5,6 +5,7 @@ using SpaceKomodo.AutoBattlerSystem.Player;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.Utilities;
 using VContainer.Unity;
 
@@ -75,6 +76,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         private void PlaySimulation()
         {
             _simulatorModel.ResetSimulatorPlayer();
+            _simulatorModel.ResetModel();
             _playbackSpeed = 5f;
             _autoBattlerModel.ResetModel();
             
@@ -116,6 +118,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         {
             switch (simulatorEvent.Type)
             {
+                case SimulatorEventType.Lose:
+                    HandleLoseEvent();
+                    break;
                 case SimulatorEventType.Life:
                 case SimulatorEventType.Armour:
                 case SimulatorEventType.Spirit:
@@ -134,18 +139,36 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
         private void ApplyAttributeEvent(SimulatorEvent simulatorEvent)
         {
-            var playerModel = simulatorEvent.TargetPlayer;
-            var attributeType = GetPlayerAttributeType(simulatorEvent.Type);
+            var unitModel = simulatorEvent.TargetUnit;
+            var attributeType = GetUnitAttributeType(simulatorEvent.Type);
             
             if (attributeType != null)
             {
-                playerModel.Attributes[attributeType.Value].Value.Value = (int)simulatorEvent.ValueAfter;
+                unitModel.Attributes[attributeType.Value].Value.Value = (int)simulatorEvent.ValueAfter;
             }
+        }
+
+        private void HandleLoseEvent()
+        {
+            _simulatorModel.IsSimulating = false;
         }
 
         private void HandleDeathEvent()
         {
-            _simulatorModel.IsSimulating = false;
+            // _simulatorModel.IsSimulating = false;
+        }
+
+        private UnitAttributeType? GetUnitAttributeType(SimulatorEventType eventType)
+        {
+            switch (eventType)
+            {
+                case SimulatorEventType.Life:
+                    return UnitAttributeType.Life;
+                case SimulatorEventType.Armour:
+                    return UnitAttributeType.Armour;
+                default:
+                    return null;
+            }
         }
 
         private PlayerAttributeType? GetPlayerAttributeType(SimulatorEventType eventType)

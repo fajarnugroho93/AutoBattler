@@ -1,5 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using R3;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using SpaceKomodo.AutoBattlerSystem.Player;
+using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
 {
@@ -7,8 +11,14 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
     {
         public readonly List<List<SimulatorEvent>> Events;
         public readonly ReactiveProperty<float> SimulatorProgress;
-        public readonly ReactiveProperty<int> CurrentSimulatorFrameIndex;
+        private readonly ReactiveProperty<int> CurrentSimulatorFrameIndex;
+        
         public List<SimulatorEvent> CurrentSimulatorFrame => Events[CurrentSimulatorFrameIndex.Value];
+
+        private readonly Dictionary<BattleTargetFlags, UnitModel> BattleTargetFlagsToUnitModelDictionary = new();
+        private readonly Dictionary<UnitModel, BattleTargetFlags> UnitModelToBattleTargetFlagsDictionary = new();
+        public readonly HashSet<UnitModel> PlayerUnitModels = new();
+        public readonly HashSet<UnitModel> EnemyUnitModels = new();
 
         public bool IsSimulating;
         public bool IsPaused;
@@ -49,12 +59,77 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
             CurrentSimulatorFrameIndex.Value += 1;
         }
+
+        public void ResetModel()
+        {
+            foreach (var keyValuePair in UnitModelToBattleTargetFlagsDictionary)
+            {
+                keyValuePair.Key.ResetModel();
+            }
+        }
         
         public void ClearEvents()
         {
             foreach (var FrameEventList in Events)
             {
                 FrameEventList.Clear();
+            }
+        }
+
+        public bool IsPlayerLose()
+        {
+            return PlayerUnitModels.All(unitModel => unitModel.IsDead);
+        }
+        
+        public bool IsEnemyLose()
+        {
+            return EnemyUnitModels.All(unitModel => unitModel.IsDead);
+        }
+
+        public void SyncBattleCollections(PlayerModel playerModel, PlayerModel enemyModel)
+        {
+            BattleTargetFlagsToUnitModelDictionary.Clear();
+            UnitModelToBattleTargetFlagsDictionary.Clear();
+            
+            SyncField(BattleTargetFlags.PlayerFieldFront_0, playerModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
+            SyncField(BattleTargetFlags.PlayerFieldCenter_0, playerModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
+            SyncField(BattleTargetFlags.PlayerFieldBack_0, playerModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldFront_0, enemyModel.CharacterModel.Positions[UnitPosition.Front].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldCenter_0, enemyModel.CharacterModel.Positions[UnitPosition.Center].Units.Value);
+            SyncField(BattleTargetFlags.OpponentFieldBack_0, enemyModel.CharacterModel.Positions[UnitPosition.Back].Units.Value);
+            
+            void SyncField(BattleTargetFlags startingFlag, IReadOnlyList<UnitModel> unitModels)
+            {
+                for (var i = 0; i < unitModels.Count; ++i)
+                {
+                    var unitModel = unitModels[i];
+                    var battleTargetFlag = (BattleTargetFlags)(uint)((int)startingFlag << i);
+                    BattleTargetFlagsToUnitModelDictionary[battleTargetFlag] = unitModel;
+                    UnitModelToBattleTargetFlagsDictionary[unitModel] = 
+                        UnitModelToBattleTargetFlagsDictionary.TryGetValue(unitModel, out var existingBattleTargetFlags) ? 
+                        (BattleTargetFlags)(uint)((int)existingBattleTargetFlags + (int)battleTargetFlag) : 
+                        battleTargetFlag;
+                }
+            }
+
+            SyncUnitModels(PlayerUnitModels, playerModel);
+            SyncUnitModels(EnemyUnitModels, enemyModel);
+
+            void SyncUnitModels(ISet<UnitModel> unitModels, PlayerModel targetPlayerModel)
+            {
+                unitModels.Clear();
+                foreach (var unitModel in targetPlayerModel.CharacterModel.Positions[UnitPosition.Front].Units.Value)
+                {
+                    unitModels.Add(unitModel);
+                }
+                foreach (var unitModel in targetPlayerModel.CharacterModel.Positions[UnitPosition.Center].Units.Value)
+                {
+                    unitModels.Add(unitModel);
+                }
+                foreach (var unitModel in targetPlayerModel.CharacterModel.Positions[UnitPosition.Back].Units.Value)
+                {
+                    unitModels.Add(unitModel);
+                }
             }
         }
     }

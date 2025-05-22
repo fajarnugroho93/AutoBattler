@@ -3,12 +3,14 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
     public enum SimulatorEventType
     {
         Invalid,
-        Death,
-        
+        Lose,
+
         Life,
         Armour,
         Spirit,
         Aura,
+        
+        Death,
         
         Cooldown,
         

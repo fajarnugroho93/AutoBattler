@@ -8,9 +8,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         public const uint FrameTick = MillisecondTick * 50;
         public const float FrameSecond = FrameTick / (float) SecondTick; 
         
-        public const uint BattleDurationTick = 120 * SecondTick;
-        public const uint EntropyCountdownStartTick = 20 * SecondTick;
-        public const uint EntropyStartTick = 30 * SecondTick;
+        public const uint BattleDurationTick = 20 * SecondTick;
+        public const uint EntropyCountdownStartTick = 2 * SecondTick;
+        public const uint EntropyStartTick = 5 * SecondTick;
 
         public const uint EntropyBaseDamage = 1;
         public const uint EntropyDamageAdditiveScalar = 1;
