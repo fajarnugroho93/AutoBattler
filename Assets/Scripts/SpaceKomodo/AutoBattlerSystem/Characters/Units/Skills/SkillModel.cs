@@ -10,7 +10,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
     public class SkillModel : ICloneable
     {
         public SkillType Type;
-        public List<SkillTarget> Targets;
+        public List<SkillTargetType> TargetTypes;
         public SerializedDictionary<SkillAttributeType, SkillAttribute> Attributes;
 
         private SkillModel _cachedReference;
@@ -18,7 +18,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
         public SkillModel(SkillModel skillModel)
         {
             Type = skillModel.Type;
-            Targets = skillModel.Targets.Select(target => (SkillTarget)target.Clone()).ToList();
+            TargetTypes = skillModel.TargetTypes.Select(targetType => targetType).ToList();
             
             Attributes = new SerializedDictionary<SkillAttributeType, SkillAttribute>();
 

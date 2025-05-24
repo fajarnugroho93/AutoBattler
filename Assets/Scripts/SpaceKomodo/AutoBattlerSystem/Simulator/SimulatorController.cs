@@ -84,11 +84,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         private void PrepareBattle()
         {
             _tickCounter = 0;
+            
+            _simulatorModel.SyncMapping(_autoBattlerModel.PlayerModel, _autoBattlerModel.EnemyModel);
+            
             _autoBattlerModel.ResetModel();
             _simulatorModel.ResetModel();
             _simulatorModel.ClearEvents();
-            
-            _simulatorModel.SyncMapping(_autoBattlerModel.PlayerModel, _autoBattlerModel.EnemyModel);
             
             _isEntropyActive = false;
             _entropyDamage = SimulatorConstants.EntropyBaseDamage;
@@ -150,7 +151,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                         skillModel.SetSkillAttribute(SkillAttributeType.Cooldown, SimulatorOperationType.ApplyToValue, attribute.MaxValue.Value);
                         newSimulatorEvent.ValueAfter = attribute.Value.Value;
                         AddNewSimulatorEvent(newSimulatorEvent);
-                        InvokeUnitSkill();
+                        InvokeUnitSkill(unitModel, skillModel);
                     }
                 }
             }
@@ -161,8 +162,15 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             return (int)SimulatorConstants.FrameTick;
         }
 
-        private void InvokeUnitSkill()
+        private void InvokeUnitSkill(UnitModel unitModel, SkillModel skillModel)
         {
+            if (unitModel.IsDead)
+            {
+                return;
+            }
+            
+            var simulatorMappingModel = _simulatorModel.GetSimulatorMappingModel(unitModel);
+            
             
         }
 

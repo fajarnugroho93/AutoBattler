@@ -2,17 +2,17 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
 {
     public enum SkillTargetType
     {
-        None,
+        None = 0,
         
-        Ally,
-        Enemy,
+        Ally = 1,
+        Enemy = 2,
         
-        Alive,
-        Dead,
+        Alive = 100,
+        Dead = 101,
         
-        ClosestColumn,
-        FarthestColumn,
+        ClosestColumn = 200,
+        FarthestColumn = 201,
         
-        SameRow,
+        SameRow = 300,
     }
 }

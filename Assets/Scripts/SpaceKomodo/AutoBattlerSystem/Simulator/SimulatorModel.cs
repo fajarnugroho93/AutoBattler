@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using R3;
+using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
@@ -97,6 +98,16 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             
             PlayerSimulatorMappingModel.SyncModel(playerUnits, enemyUnits);
             EnemySimulatorMappingModel.SyncModel(enemyUnits, playerUnits);
+        }
+
+        public SimulatorMappingModel GetSimulatorMappingModel(UnitModel unitModel)
+        {
+            if (PlayerSimulatorMappingModel.Contains(unitModel))
+            {
+                return PlayerSimulatorMappingModel;
+            }
+
+            return EnemySimulatorMappingModel;
         }
     }
 }

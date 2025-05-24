@@ -17,6 +17,11 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             UnitModels = new HashSet<UnitModel>();
         }
 
+        public bool Contains(UnitModel unitModel)
+        {
+            return UnitModels.Contains(unitModel);
+        }
+        
         private void ResetModel()
         {
             BattleTargetFlagsToUnitModelDictionary.Clear();
