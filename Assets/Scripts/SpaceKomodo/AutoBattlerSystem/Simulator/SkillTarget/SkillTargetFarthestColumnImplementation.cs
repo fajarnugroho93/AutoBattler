@@ -1,20 +1,27 @@
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
+using UnityEngine;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
-    public class SkillTargetFarthestColumnImplementation
+    public static class SkillTargetFarthestColumnImplementation
     {
         public static void Process(
             UnitModel unitModel,
             SimulatorMappingModel simulatorMappingModel,
             SkillTargetPriorityModel skillTargetPriorityModel)
         {
+            var sourceFlags = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[unitModel];
+            var sourceColumn = sourceFlags.GetColumnIndex();
+
             foreach (var keyValuePair in skillTargetPriorityModel.SkillTargetPriorities)
             {
-                var battleTargetFlag = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[keyValuePair.Key];
+                var targetFlags = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[keyValuePair.Key];
+                var targetColumn = targetFlags.GetColumnIndex();
                 
-                
+                var distance = Mathf.Abs(sourceColumn - targetColumn);
+                var priority = distance / SimulatorConstants.MaxColumn;
+                skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * priority;
             }
         }
     }

@@ -1,9 +1,10 @@
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
+using UnityEngine;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
-    public static class SkillTargetSameRowImplementation
+    public static class SkillTargetFarthestRowImplementation
     {
         public static void Process(
             UnitModel unitModel,
@@ -18,14 +19,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
                 var targetFlags = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[keyValuePair.Key];
                 var targetRow = targetFlags.GetRowIndex();
                 
-                if (sourceRow == targetRow)
-                {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 1f;
-                }
-                else
-                {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 0f;
-                }
+                var distance = Mathf.Abs(sourceRow - targetRow);
+                var priority = distance / SimulatorConstants.MaxRow;
+                skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * priority;
             }
         }
     }

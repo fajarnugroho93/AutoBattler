@@ -38,6 +38,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
                 case SkillTargetType.FarthestColumn:
                     SkillTargetFarthestColumnImplementation.Process(unitModel, simulatorMappingModel, skillTargetPriorityModel);
                     break;
+                case SkillTargetType.ClosestRow:
+                    SkillTargetClosestRowImplementation.Process(unitModel, simulatorMappingModel, skillTargetPriorityModel);
+                    break;
+                case SkillTargetType.FarthestRow:
+                    SkillTargetFarthestRowImplementation.Process(unitModel, simulatorMappingModel, skillTargetPriorityModel);
+                    break;
                 case SkillTargetType.SameRow:
                     SkillTargetSameRowImplementation.Process(unitModel, simulatorMappingModel, skillTargetPriorityModel);
                     break;

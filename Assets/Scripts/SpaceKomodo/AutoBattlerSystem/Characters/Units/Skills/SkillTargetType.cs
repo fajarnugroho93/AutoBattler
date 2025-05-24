@@ -14,6 +14,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
         ClosestColumn = 200,
         FarthestColumn = 201,
         
-        SameRow = 300,
+        ClosestRow = 300,
+        FarthestRow = 301,
+        SameRow = 302,
     }
 }

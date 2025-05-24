@@ -3,7 +3,7 @@ using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
-    public class SkillTargetAliveImplementation
+    public static class SkillTargetAliveImplementation
     {
         public static void Process(
             UnitModel unitModel,

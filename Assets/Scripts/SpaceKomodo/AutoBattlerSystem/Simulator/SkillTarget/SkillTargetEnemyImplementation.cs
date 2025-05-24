@@ -15,7 +15,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
             {
                 var battleTargetFlag = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[keyValuePair.Key];
                 
-                if ((battleTargetFlag & BattleTargetFlags.OpponentField) == 0)
+                if ((battleTargetFlag & BattleTargetFlags.OpponentField) != 0)
                 {
                     skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 1;
                 }

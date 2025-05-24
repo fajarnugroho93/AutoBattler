@@ -17,5 +17,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         public const uint EntropyBaseDurationTick = 2 * SecondTick;
         public const uint EntropyDurationAdditiveScalar = 200 * MillisecondTick;
         public const uint EntropyMinDurationTick = 200 * MillisecondTick;
+
+        public const int MaxColumn = 6;
+        public const int MaxRow = 4;
     }
 }
