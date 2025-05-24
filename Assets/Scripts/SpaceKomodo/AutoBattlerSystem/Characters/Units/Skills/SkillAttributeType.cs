@@ -6,6 +6,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
     public enum SkillAttributeType
     {
         Cooldown,
+        Target,
+        
         Damage,
         Heal,
     }
