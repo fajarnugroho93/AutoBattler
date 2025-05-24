@@ -6,6 +6,7 @@ using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills;
 using SpaceKomodo.AutoBattlerSystem.Core;
 using SpaceKomodo.AutoBattlerSystem.Events;
 using SpaceKomodo.AutoBattlerSystem.Player;
+using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
 using VContainer.Unity;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
@@ -14,6 +15,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
     {
         private readonly AutoBattlerModel _autoBattlerModel;
         private readonly SimulatorModel _simulatorModel;
+        private readonly SkillTargetPriorityProcessor _skillTargetPriorityProcessor;
         private readonly ISubscriber<SimulateButtonClickedEvent> _simulateButtonClickedSubscriber;
         
         private uint _tickCounter;
@@ -31,10 +33,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         public SimulatorController(
             AutoBattlerModel autoBattlerModel,
             SimulatorModel simulatorModel,
+            SkillTargetPriorityProcessor skillTargetPriorityProcessor,
             ISubscriber<SimulateButtonClickedEvent> simulateButtonClickedSubscriber)
         {
             _autoBattlerModel = autoBattlerModel;
             _simulatorModel = simulatorModel;
+            _skillTargetPriorityProcessor = skillTargetPriorityProcessor;
             _simulateButtonClickedSubscriber = simulateButtonClickedSubscriber;
         }
         
@@ -170,8 +174,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             }
             
             var simulatorMappingModel = _simulatorModel.GetSimulatorMappingModel(unitModel);
-            
-            
+            _skillTargetPriorityProcessor.CalculateSkillTargetPriority(unitModel, skillModel, simulatorMappingModel);
         }
 
         private void EvaluateUnitDeaths(HashSet<UnitModel> unitModels)

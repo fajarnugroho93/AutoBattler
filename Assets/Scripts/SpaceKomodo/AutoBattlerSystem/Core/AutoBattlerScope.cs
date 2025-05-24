@@ -1,6 +1,7 @@
 using MessagePipe;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Simulator;
+using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
 using SpaceKomodo.Utilities;
 using VContainer;
 using VContainer.Unity;
@@ -23,6 +24,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
             builder.RegisterComponentInHierarchy<AutoBattlerView>();
             
             builder.Register<SimulatorModel>(Lifetime.Singleton);
+            builder.Register<SkillTargetPriorityModel>(Lifetime.Singleton);
+            builder.Register<SkillTargetPriorityProcessor>(Lifetime.Singleton);
             
             builder.RegisterEntryPoint<SimulatorController>();
             builder.RegisterEntryPoint<SimulatorPlayerController>();

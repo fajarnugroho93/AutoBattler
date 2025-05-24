@@ -4,8 +4,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills
     {
         None = 0,
         
-        Ally = 1,
-        Enemy = 2,
+        Self = 1,
+        Ally = 2,
+        Enemy = 3,
         
         Alive = 100,
         Dead = 101,
