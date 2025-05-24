@@ -94,11 +94,11 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             var playerUnits = playerModel.CharacterModel.Units;
             var enemyUnits = enemyModel.CharacterModel.Units;
             
-            SyncPositionRange(playerUnits, 0, 3, BattleTargetFlags.PlayerFieldFront_0);
+            SyncPositionRange(playerUnits, 0, 3, BattleTargetFlags.PlayerFieldTopFront);
             SyncPositionRange(enemyUnits, 0, 3, BattleTargetFlags.OpponentFieldFront_0);
-            SyncPositionRange(playerUnits, 4, 7, BattleTargetFlags.PlayerFieldCenter_0);
+            SyncPositionRange(playerUnits, 4, 7, BattleTargetFlags.PlayerFieldTopCenter);
             SyncPositionRange(enemyUnits, 4, 7, BattleTargetFlags.OpponentFieldCenter_0);
-            SyncPositionRange(playerUnits, 8, 11, BattleTargetFlags.PlayerFieldBack_0);
+            SyncPositionRange(playerUnits, 8, 11, BattleTargetFlags.PlayerFieldTopBack);
             SyncPositionRange(enemyUnits, 8, 11, BattleTargetFlags.OpponentFieldBack_0);
             
             SyncUnitModelCollections(PlayerUnitModels, playerUnits);
