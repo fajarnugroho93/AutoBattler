@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using SpaceKomodo.AutoBattlerSystem.Characters;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
 using SpaceKomodo.Utilities;
@@ -31,33 +30,35 @@ namespace SpaceKomodo.AutoBattlerSystem.Core
             _autoBattlerModel.Setup();
 
             InstantiateUnitViews(
-                _autoBattlerModel.PlayerModel.CharacterModel.Positions, 
+                _autoBattlerModel.PlayerModel.CharacterModel.Units,
                 _autoBattlerView.PlayerWorldView, 
                 _playerUnitViews);
 
             InstantiateUnitViews(
-                _autoBattlerModel.EnemyModel.CharacterModel.Positions, 
+                _autoBattlerModel.EnemyModel.CharacterModel.Units,
                 _autoBattlerView.EnemyWorldView, 
                 _enemyUnitViews);
+        }
 
-            void InstantiateUnitViews(
-                Dictionary<UnitPosition, PositionModel> positions, 
-                PlayerWorldView playerView, 
-                IDictionary<UnitModel, UnitView> unitViews)
+        private void InstantiateUnitViews(
+            UnitModel[] units,
+            PlayerWorldView playerView, 
+            IDictionary<UnitModel, UnitView> unitViews)
+        {
+            for (int i = 0; i < units.Length; i++)
             {
-                foreach (var keyValuePair in positions)
-                {
-                    var worldLayoutGroup = playerView.GetPositionParent(keyValuePair.Key);
-                    
-                    foreach (var unitModel in keyValuePair.Value.Units.Value)
-                    {
-                        var view = _unitViewFactory.Create(unitModel, worldLayoutGroup.transform);
-                        unitViews.Add(unitModel, view);
-                    }
-                    
-                    worldLayoutGroup.RecalculateLayout();
-                }
+                if (units[i] == null) continue;
+                
+                var worldLayoutGroup = playerView.GetPositionParent(i);
+                if (worldLayoutGroup == null) continue;
+                
+                var view = _unitViewFactory.Create(units[i], worldLayoutGroup.transform);
+                unitViews.Add(units[i], view);
             }
+            
+            playerView.FrontLayoutGroup.RecalculateLayout();
+            playerView.CenterLayoutGroup.RecalculateLayout(); 
+            playerView.BackLayoutGroup.RecalculateLayout();
         }
     }
 }

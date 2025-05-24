@@ -1,38 +1,48 @@
 using System;
-using System.Collections.Generic;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
+using UnityEngine;
 
 namespace SpaceKomodo.AutoBattlerSystem.Characters
 {
     [Serializable]
     public class CharacterModel : ICloneable
     {
-        public List<UnitScriptableObject> BackLoadouts;
-        public List<UnitScriptableObject> CenterLoadouts;
-        public List<UnitScriptableObject> FrontLoadouts;
-
+        public UnitScriptableObject[] UnitScriptableObjects;
         public int Life;
-        
-        public Dictionary<UnitPosition, PositionModel> Positions = new();
 
+        [HideInInspector] public UnitModel[] Units;
         public CharacterModel(CharacterModel characterModel)
         {
-            SetupLoadout(UnitPosition.Back, characterModel.BackLoadouts);
-            SetupLoadout(UnitPosition.Center, characterModel.CenterLoadouts);
-            SetupLoadout(UnitPosition.Front, characterModel.FrontLoadouts);
-
-            Life = characterModel.Life;
-
-            void SetupLoadout(UnitPosition unitPosition, List<UnitScriptableObject> unitScriptableObjects)
+            Units = new UnitModel[12];
+            for (int i = 0; i < 12; i++)
             {
-                var newPositionModel = new PositionModel();
-                Positions.Add(unitPosition, newPositionModel);
-
-                foreach (var unitScriptableObject in unitScriptableObjects)
+                if (characterModel.UnitScriptableObjects[i] != null)
                 {
-                    newPositionModel.Units.Value.Add((UnitModel)unitScriptableObject.UnitModel.Clone());
+                    Units[i] = new UnitModel(characterModel.UnitScriptableObjects[i].UnitModel);
                 }
             }
+            Life = characterModel.Life;
+        }
+
+        public UnitModel[] GetFrontUnits() 
+        { 
+            var result = new UnitModel[4];
+            Array.Copy(Units, 0, result, 0, 4);
+            return result;
+        }
+        
+        public UnitModel[] GetCenterUnits() 
+        { 
+            var result = new UnitModel[4];
+            Array.Copy(Units, 4, result, 0, 4);
+            return result;
+        }
+        
+        public UnitModel[] GetBackUnits() 
+        { 
+            var result = new UnitModel[4];
+            Array.Copy(Units, 8, result, 0, 4);
+            return result;
         }
 
         public object Clone()
