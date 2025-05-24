@@ -56,13 +56,13 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             {
                 _currentFrameEventList = frameEventList;
 
-                EvaluateUnitSkills(_simulatorModel.PlayerUnitModels);
-                EvaluateUnitSkills(_simulatorModel.EnemyUnitModels);
+                EvaluateUnitSkills(_simulatorModel.PlayerSimulatorMappingModel.UnitModels);
+                EvaluateUnitSkills(_simulatorModel.EnemySimulatorMappingModel.UnitModels);
                 
                 EvaluateEntropy();
 
-                EvaluateUnitDeaths(_simulatorModel.PlayerUnitModels);
-                EvaluateUnitDeaths(_simulatorModel.EnemyUnitModels);
+                EvaluateUnitDeaths(_simulatorModel.PlayerSimulatorMappingModel.UnitModels);
+                EvaluateUnitDeaths(_simulatorModel.EnemySimulatorMappingModel.UnitModels);
                 
                 if (_simulatorModel.IsEnemyLose())
                 {
@@ -77,16 +77,18 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                 
                 _tickCounter += SimulatorConstants.FrameTick;
             }
+
+            ConcludeBattle();
         }
 
         private void PrepareBattle()
         {
-            _simulatorModel.SyncBattleCollections(_autoBattlerModel.PlayerModel, _autoBattlerModel.EnemyModel);
+            _tickCounter = 0;
             _autoBattlerModel.ResetModel();
-            
             _simulatorModel.ResetModel();
             _simulatorModel.ClearEvents();
-            _tickCounter = 0;
+            
+            _simulatorModel.SyncMapping(_autoBattlerModel.PlayerModel, _autoBattlerModel.EnemyModel);
             
             _isEntropyActive = false;
             _entropyDamage = SimulatorConstants.EntropyBaseDamage;
@@ -95,6 +97,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             _minEntropyTick = SimulatorConstants.EntropyMinDurationTick;
             _maxEntropyTick = SimulatorConstants.EntropyBaseDurationTick;
             _entropyTickAdditiveScalar = SimulatorConstants.EntropyDurationAdditiveScalar;
+        }
+
+        private void ConcludeBattle()
+        {
+            _autoBattlerModel.ResetModel();
+            _simulatorModel.ResetModel();
         }
 
         private void EvaluateUnitSkills(HashSet<UnitModel> unitModels)
@@ -197,8 +205,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                     {
                         _isEntropyActive = true;
                         AddNewSimulatorEvent(SimulatorEventType.StartEntropy);
-                        TakeEntropyDamage(_simulatorModel.EnemyUnitModels);
-                        TakeEntropyDamage(_simulatorModel.PlayerUnitModels);
+                        TakeEntropyDamage(_simulatorModel.EnemySimulatorMappingModel.UnitModels);
+                        TakeEntropyDamage(_simulatorModel.PlayerSimulatorMappingModel.UnitModels);
                         break;
                     }
                 }
@@ -210,8 +218,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
                 if (_entropyTickCounter >= _maxEntropyTick)
                 {
-                    TakeEntropyDamage(_simulatorModel.EnemyUnitModels);
-                    TakeEntropyDamage(_simulatorModel.PlayerUnitModels);
+                    TakeEntropyDamage(_simulatorModel.EnemySimulatorMappingModel.UnitModels);
+                    TakeEntropyDamage(_simulatorModel.PlayerSimulatorMappingModel.UnitModels);
                     _entropyTickCounter = 0;
 
                     if (_maxEntropyTick > _minEntropyTick)

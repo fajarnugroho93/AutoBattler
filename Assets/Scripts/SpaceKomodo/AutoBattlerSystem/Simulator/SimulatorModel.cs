@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using R3;
-using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player;
-using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 
 namespace SpaceKomodo.AutoBattlerSystem.Simulator
 {
@@ -15,10 +13,8 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
         
         public List<SimulatorEvent> CurrentSimulatorFrame => Events[CurrentSimulatorFrameIndex.Value];
 
-        private readonly Dictionary<BattleTargetFlags, UnitModel> BattleTargetFlagsToUnitModelDictionary = new();
-        private readonly Dictionary<UnitModel, BattleTargetFlags> UnitModelToBattleTargetFlagsDictionary = new();
-        public readonly HashSet<UnitModel> PlayerUnitModels = new();
-        public readonly HashSet<UnitModel> EnemyUnitModels = new();
+        public readonly SimulatorMappingModel PlayerSimulatorMappingModel;
+        public readonly SimulatorMappingModel EnemySimulatorMappingModel;
 
         public bool IsSimulating;
         public bool IsPaused;
@@ -36,6 +32,9 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
             CurrentSimulatorFrameIndex = new ReactiveProperty<int>(0);
             CurrentSimulatorFrameIndex.Subscribe(OnCurrentSimulatorFrameIndexChanged);
+
+            PlayerSimulatorMappingModel = new SimulatorMappingModel();
+            EnemySimulatorMappingModel = new SimulatorMappingModel();
 
             void OnCurrentSimulatorFrameIndexChanged(int value)
             {
@@ -62,9 +61,14 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
         public void ResetModel()
         {
-            foreach (var keyValuePair in UnitModelToBattleTargetFlagsDictionary)
+            foreach (var unitModel in PlayerSimulatorMappingModel.UnitModels)
             {
-                keyValuePair.Key.ResetModel();
+                unitModel.ResetModel();
+            }
+
+            foreach (var unitModel in EnemySimulatorMappingModel.UnitModels)
+            {
+                unitModel.ResetModel();
             }
         }
         
@@ -78,59 +82,21 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
 
         public bool IsPlayerLose()
         {
-            return PlayerUnitModels.All(unitModel => unitModel.IsDead);
+            return PlayerSimulatorMappingModel.UnitModels.All(unitModel => unitModel.IsDead);
         }
         
         public bool IsEnemyLose()
         {
-            return EnemyUnitModels.All(unitModel => unitModel.IsDead);
+            return EnemySimulatorMappingModel.UnitModels.All(unitModel => unitModel.IsDead);
         }
 
-        public void SyncBattleCollections(PlayerModel playerModel, PlayerModel enemyModel)
+        public void SyncMapping(PlayerModel playerModel, PlayerModel enemyModel)
         {
-            BattleTargetFlagsToUnitModelDictionary.Clear();
-            UnitModelToBattleTargetFlagsDictionary.Clear();
-            
             var playerUnits = playerModel.CharacterModel.Units;
             var enemyUnits = enemyModel.CharacterModel.Units;
             
-            SyncPositionRange(playerUnits, 0, 3, BattleTargetFlags.PlayerFieldTopFront);
-            SyncPositionRange(enemyUnits, 0, 3, BattleTargetFlags.OpponentFieldFront_0);
-            SyncPositionRange(playerUnits, 4, 7, BattleTargetFlags.PlayerFieldTopCenter);
-            SyncPositionRange(enemyUnits, 4, 7, BattleTargetFlags.OpponentFieldCenter_0);
-            SyncPositionRange(playerUnits, 8, 11, BattleTargetFlags.PlayerFieldTopBack);
-            SyncPositionRange(enemyUnits, 8, 11, BattleTargetFlags.OpponentFieldBack_0);
-            
-            SyncUnitModelCollections(PlayerUnitModels, playerUnits);
-            SyncUnitModelCollections(EnemyUnitModels, enemyUnits);
-        }
-
-        private void SyncPositionRange(UnitModel[] units, int startIndex, int endIndex, BattleTargetFlags startingFlag)
-        {
-            for (int i = startIndex; i <= endIndex; i++)
-            {
-                if (units[i] == null) continue;
-                
-                var slotOffset = i - startIndex;
-                var battleTargetFlag = (BattleTargetFlags)(uint)((int)startingFlag << slotOffset);
-                BattleTargetFlagsToUnitModelDictionary[battleTargetFlag] = units[i];
-                UnitModelToBattleTargetFlagsDictionary[units[i]] = 
-                    UnitModelToBattleTargetFlagsDictionary.TryGetValue(units[i], out var existingFlags) ? 
-                    (BattleTargetFlags)(uint)((int)existingFlags + (int)battleTargetFlag) : 
-                    battleTargetFlag;
-            }
-        }
-
-        private void SyncUnitModelCollections(ISet<UnitModel> unitModels, UnitModel[] sourceUnits)
-        {
-            unitModels.Clear();
-            for (int i = 0; i < sourceUnits.Length; i++)
-            {
-                if (sourceUnits[i] != null)
-                {
-                    unitModels.Add(sourceUnits[i]);
-                }
-            }
+            PlayerSimulatorMappingModel.SyncModel(playerUnits, enemyUnits);
+            EnemySimulatorMappingModel.SyncModel(enemyUnits, playerUnits);
         }
     }
 }
