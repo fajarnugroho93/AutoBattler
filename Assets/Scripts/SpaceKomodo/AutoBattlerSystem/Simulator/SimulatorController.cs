@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MessagePipe;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units.Skills;
@@ -166,15 +167,30 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             return (int)SimulatorConstants.FrameTick;
         }
 
-        private void InvokeUnitSkill(UnitModel unitModel, SkillModel skillModel)
+        private void InvokeUnitSkill(UnitModel sourceUnitModel, SkillModel skillModel)
         {
-            if (unitModel.IsDead)
+            if (sourceUnitModel.IsDead)
             {
                 return;
             }
             
-            var simulatorMappingModel = _simulatorModel.GetSimulatorMappingModel(unitModel);
-            _skillTargetPriorityProcessor.CalculateSkillTargetPriority(unitModel, skillModel, simulatorMappingModel);
+            var simulatorMappingModel = _simulatorModel.GetSimulatorMappingModel(sourceUnitModel);
+            var targetCount = skillModel.Attributes[SkillAttributeType.Target].Value.Value;
+            var sortedTargetModels = _skillTargetPriorityProcessor.CalculateSkillTargetPriority(sourceUnitModel, skillModel, simulatorMappingModel).Take(targetCount);
+
+            foreach (var targetUnitModel in sortedTargetModels)
+            {
+                ApplySkillEffects(sourceUnitModel, skillModel, targetUnitModel);
+            }
+        }
+
+        private void ApplySkillEffects(UnitModel sourceUnitModel, SkillModel skillModel, UnitModel targetUnitModel)
+        {
+            if (skillModel.Attributes.TryGetValue(SkillAttributeType.Damage, out var damageAttribute))
+            {
+                var damageValue = damageAttribute.Value.Value;
+                TakeLifeDamage(sourceUnitModel, targetUnitModel, SimulatorSourceType.Life, damageValue);
+            }
         }
 
         private void EvaluateUnitDeaths(HashSet<UnitModel> unitModels)
@@ -254,11 +270,12 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
                     continue;
                 }
                 
-                TakeLifeDamage(unitModel, SimulatorSourceType.Entropy, _entropyDamage);   
+                TakeLifeDamage(unitModel, unitModel, SimulatorSourceType.Entropy, _entropyDamage);   
             }
         }
 
         private void TakeLifeDamage(
+            UnitModel sourceUnitModel, 
             UnitModel targetUnitModel, 
             SimulatorSourceType sourceType,
             float deltaValue)
@@ -274,6 +291,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator
             var newSimulatorEvent = new SimulatorEvent
             {
                 Type = SimulatorEventType.Life,
+                SourceUnit = sourceUnitModel,
                 TargetUnit = targetUnitModel,
                 SourceType = sourceType,
                 OperationType = SimulatorOperationType.ApplyToValue,

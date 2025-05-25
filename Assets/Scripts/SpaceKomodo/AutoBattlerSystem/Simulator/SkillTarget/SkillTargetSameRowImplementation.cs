@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
 
@@ -5,10 +6,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
     public static class SkillTargetSameRowImplementation
     {
-        public static void Process(
-            UnitModel unitModel,
+        public static void Process(UnitModel unitModel,
             SimulatorMappingModel simulatorMappingModel,
-            SkillTargetPriorityModel skillTargetPriorityModel)
+            SkillTargetPriorityModel skillTargetPriorityModel, 
+            Dictionary<UnitModel, float> processedDictionary)
         {
             var sourceFlags = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[unitModel];
             var sourceRow = sourceFlags.GetRowIndex();
@@ -20,11 +21,11 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
                 
                 if (sourceRow == targetRow)
                 {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 1f;
+                    processedDictionary.Add(keyValuePair.Key, 1);
                 }
                 else
                 {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 0f;
+                    processedDictionary.Add(keyValuePair.Key, 0);
                 }
             }
         }

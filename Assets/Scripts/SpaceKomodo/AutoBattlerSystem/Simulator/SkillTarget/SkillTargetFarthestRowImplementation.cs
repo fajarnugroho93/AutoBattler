@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
 using UnityEngine;
@@ -6,10 +7,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
     public static class SkillTargetFarthestRowImplementation
     {
-        public static void Process(
-            UnitModel unitModel,
+        public static void Process(UnitModel unitModel,
             SimulatorMappingModel simulatorMappingModel,
-            SkillTargetPriorityModel skillTargetPriorityModel)
+            SkillTargetPriorityModel skillTargetPriorityModel, 
+            Dictionary<UnitModel, float> processedDictionary)
         {
             var sourceFlags = simulatorMappingModel.UnitModelToBattleTargetFlagsDictionary[unitModel];
             var sourceRow = sourceFlags.GetRowIndex();
@@ -21,7 +22,7 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
                 
                 var distance = Mathf.Abs(sourceRow - targetRow);
                 var priority = distance / SimulatorConstants.MaxRow;
-                skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * priority;
+                processedDictionary.Add(keyValuePair.Key, priority);
             }
         }
     }

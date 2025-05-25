@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpaceKomodo.AutoBattlerSystem.Characters.Units;
 using SpaceKomodo.AutoBattlerSystem.Player.Squad;
 using SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget.Priority;
@@ -6,10 +7,10 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
 {
     public static class SkillTargetAllyImplementation
     {
-        public static void Process(
-            UnitModel unitModel,
+        public static void Process(UnitModel unitModel,
             SimulatorMappingModel simulatorMappingModel,
-            SkillTargetPriorityModel skillTargetPriorityModel)
+            SkillTargetPriorityModel skillTargetPriorityModel, 
+            Dictionary<UnitModel, float> processedDictionary)
         {
             foreach (var keyValuePair in skillTargetPriorityModel.SkillTargetPriorities)
             {
@@ -18,11 +19,11 @@ namespace SpaceKomodo.AutoBattlerSystem.Simulator.SkillTarget
                 if ((battleTargetFlag & BattleTargetFlags.SelfField) != 0 &&
                     unitModel != keyValuePair.Key)
                 {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 1;
+                    processedDictionary.Add(keyValuePair.Key, 1);
                 }
                 else
                 {
-                    skillTargetPriorityModel.SkillTargetPriorities[keyValuePair.Key] = keyValuePair.Value * 0;
+                    processedDictionary.Add(keyValuePair.Key, 0);
                 }
             }
         }
